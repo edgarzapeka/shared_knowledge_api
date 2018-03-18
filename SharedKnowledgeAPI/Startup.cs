@@ -11,6 +11,9 @@ using Microsoft.Extensions.DependencyInjection;
 using SharedKnowledgeAPI.Data;
 using SharedKnowledgeAPI.Models;
 using SharedKnowledgeAPI.Services;
+using System.IdentityModel.Tokens.Jwt;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace SharedKnowledgeAPI
 {
@@ -35,7 +38,31 @@ namespace SharedKnowledgeAPI
 
             // Add application services.
             services.AddTransient<IEmailSender, EmailSender>();
-
+            services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAll", builder =>
+                {
+                    builder
+                        .AllowAnyOrigin()
+                        .AllowAnyMethod()
+                        .AllowAnyHeader()
+                        .AllowCredentials();
+                });
+            });
+            JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
+            services.AddAuthentication()
+                .AddJwtBearer(cfg =>
+                {
+                    cfg.RequireHttpsMetadata = false;
+                    cfg.SaveToken = true;
+                    cfg.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidIssuer = Configuration["TokenInformation:Issuer"],
+                        ValidAudience = Configuration["TokenInformation:Audience"],
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["TokenInformation:Key"])),
+                        ClockSkew = TimeSpan.Zero
+                    };
+                });
             services.AddMvc();
         }
 
@@ -56,7 +83,7 @@ namespace SharedKnowledgeAPI
             app.UseStaticFiles();
 
             app.UseAuthentication();
-
+            app.UseCors("AllowAll");
             app.UseMvc(routes =>
             {
                 routes.MapRoute(
