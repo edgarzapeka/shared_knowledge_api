@@ -31,6 +31,7 @@ namespace SharedKnowledgeAPI
         {
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+                //options.UseSqlite(Configuration.GetConnectionString("DefaultConnection")));
 
             services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
@@ -38,17 +39,6 @@ namespace SharedKnowledgeAPI
 
             // Add application services.
             services.AddTransient<IEmailSender, EmailSender>();
-            services.AddCors(options =>
-            {
-                options.AddPolicy("AllowAll", builder =>
-                {
-                    builder
-                        .AllowAnyOrigin()
-                        .AllowAnyMethod()
-                        .AllowAnyHeader()
-                        .AllowCredentials();
-                });
-            });
             JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
             services.AddAuthentication()
                 .AddJwtBearer(cfg =>
@@ -63,6 +53,17 @@ namespace SharedKnowledgeAPI
                         ClockSkew = TimeSpan.Zero
                     };
                 });
+            services.AddCors(options => {
+                options.AddPolicy("AllowAll",
+                    builder =>
+                    {
+                        builder
+                        .AllowAnyOrigin()
+                        .AllowAnyMethod()
+                        .AllowAnyHeader()
+                        .AllowCredentials();
+                    });
+            });
             services.AddMvc();
         }
 
@@ -81,7 +82,6 @@ namespace SharedKnowledgeAPI
             }
 
             app.UseStaticFiles();
-
             app.UseAuthentication();
             app.UseCors("AllowAll");
             app.UseMvc(routes =>

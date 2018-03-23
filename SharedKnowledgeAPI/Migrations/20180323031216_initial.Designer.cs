@@ -8,17 +8,17 @@ using Microsoft.EntityFrameworkCore.Storage.Internal;
 using SharedKnowledgeAPI.Data;
 using System;
 
-namespace SharedKnowledgeAPI.Data.Migrations
+namespace SharedKnowledgeAPI.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20180318040807_Initial")]
-    partial class Initial
+    [Migration("20180323031216_initial")]
+    partial class initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "2.0.1-rtm-125")
+                .HasAnnotation("ProductVersion", "2.0.2-rtm-10011")
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -144,6 +144,8 @@ namespace SharedKnowledgeAPI.Data.Migrations
 
                     b.Property<bool>("EmailConfirmed");
 
+                    b.Property<int>("Karma");
+
                     b.Property<bool>("LockoutEnabled");
 
                     b.Property<DateTimeOffset?>("LockoutEnd");
@@ -178,6 +180,52 @@ namespace SharedKnowledgeAPI.Data.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers");
+                });
+
+            modelBuilder.Entity("SharedKnowledgeAPI.Models.Comment", b =>
+                {
+                    b.Property<string>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<string>("ApplicationUserId");
+
+                    b.Property<string>("Body");
+
+                    b.Property<DateTime>("Date");
+
+                    b.Property<string>("LinkId");
+
+                    b.Property<int>("Rate");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ApplicationUserId");
+
+                    b.HasIndex("LinkId");
+
+                    b.ToTable("Comment");
+                });
+
+            modelBuilder.Entity("SharedKnowledgeAPI.Models.Link", b =>
+                {
+                    b.Property<string>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<string>("ApplicationUserId");
+
+                    b.Property<DateTime>("Date");
+
+                    b.Property<string>("LinkURL");
+
+                    b.Property<int>("Rating");
+
+                    b.Property<string>("Title");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ApplicationUserId");
+
+                    b.ToTable("Link");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -223,6 +271,25 @@ namespace SharedKnowledgeAPI.Data.Migrations
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("SharedKnowledgeAPI.Models.Comment", b =>
+                {
+                    b.HasOne("SharedKnowledgeAPI.Models.ApplicationUser", "ApplicationUser")
+                        .WithMany()
+                        .HasForeignKey("ApplicationUserId");
+
+                    b.HasOne("SharedKnowledgeAPI.Models.Link", "Link")
+                        .WithMany("Comments")
+                        .HasForeignKey("LinkId")
+                        .OnDelete(DeleteBehavior.SetNull);
+                });
+
+            modelBuilder.Entity("SharedKnowledgeAPI.Models.Link", b =>
+                {
+                    b.HasOne("SharedKnowledgeAPI.Models.ApplicationUser", "ApplicationUser")
+                        .WithMany()
+                        .HasForeignKey("ApplicationUserId");
                 });
 #pragma warning restore 612, 618
         }

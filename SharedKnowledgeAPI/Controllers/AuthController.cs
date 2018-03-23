@@ -7,10 +7,12 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using SharedKnowledgeAPI.Data;
 using SharedKnowledgeAPI.Models;
 using SharedKnowledgeAPI.Models.AccountViewModels;
 using static SharedKnowledgeAPI.Services.CustomAuthorizationHelper;
@@ -21,13 +23,15 @@ namespace SharedKnowledgeAPI.Controllers
     {
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly IConfiguration _configuration; 
+        private readonly IConfiguration _configuration;
+        private readonly ApplicationDbContext _context;
 
-        public AuthController(SignInManager<ApplicationUser> signInManager, UserManager<ApplicationUser> userManager, IConfiguration configuration)
+        public AuthController(SignInManager<ApplicationUser> signInManager, UserManager<ApplicationUser> userManager, IConfiguration configuration, ApplicationDbContext context)
         {
             _signInManager = signInManager;
             _userManager = userManager;
             _configuration = configuration;
+            _context = context;
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
@@ -43,34 +47,37 @@ namespace SharedKnowledgeAPI.Controllers
 
             if (result.Succeeded)
             {
-                var appUser = _userManager.Users.SingleOrDefault(r => r.Email == model.Email);
-                return await GenerateJwtToken(model.Email, appUser);
+                ApplicationUser appUser = _context.ApplicationUser.SingleOrDefault(r => r.Email == model.Email);
+
+                return await GenerateUserState(model.Email);
             }
 
-            throw new ApplicationException("Invalid Login Attempt");
+                throw new ApplicationException("Invalid Login Attempt");
         }
 
         [HttpPost]
         public async Task<object> Register([FromBody] RegisterViewModel model)
         {
-            var user = new ApplicationUser
-            {
+            var result = await _userManager.CreateAsync(new ApplicationUser {
                 UserName = model.Email,
-                Email = model.Email
-            };
-            var result = await _userManager.CreateAsync(user, model.Password);
+                Email = model.Email,
+                Karma = 0
+            }, model.Password);
 
             if (result.Succeeded)
             {
-                await _signInManager.SignInAsync(user, false);
-                return await GenerateJwtToken(model.Email, user);
+                ApplicationUser appUser = _context.ApplicationUser.SingleOrDefault(r => r.Email == model.Email);
+                await _signInManager.SignInAsync(appUser, false);
+
+                return await GenerateUserState(model.Email);
             }
 
             throw new ApplicationException("Invalid Registration Attempt");
         }
 
-        private async Task<object> GenerateJwtToken(string email, IdentityUser user)
+        private async Task<object> GenerateUserState(string email)
         {
+            ApplicationUser user = _context.ApplicationUser.SingleOrDefault(r => r.Email == email);
             var claims = new List<Claim> {
                 new Claim(JwtRegisteredClaimNames.Sub, email),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
@@ -90,7 +97,8 @@ namespace SharedKnowledgeAPI.Controllers
                 signingCredentials: creds
             );
             var formattedToken = new JwtSecurityTokenHandler().WriteToken(token);
-            return Ok(new { token = formattedToken, secret = user.SecurityStamp });
+            //return Ok(new { token = formattedToken, secret = user.SecurityStamp, id = user.Id });
+            return Ok(new UserState() { Id = user.Id, Email = user.Email, Name = user.UserName, Karma = user.Karma, Token = formattedToken, Secret = user.SecurityStamp });
         }
 
         public List<LoginViewModel> GetFakeData()
@@ -118,7 +126,5 @@ namespace SharedKnowledgeAPI.Controllers
         {
             return GetFakeData();
         }
-
-
     }
 }

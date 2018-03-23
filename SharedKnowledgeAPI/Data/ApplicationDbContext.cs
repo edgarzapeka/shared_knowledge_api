@@ -17,10 +17,21 @@ namespace SharedKnowledgeAPI.Data
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
+            builder.Entity<Link>()
+                .HasMany(c => c.Comments)
+                .WithOne(l => l.Link)
+                .HasForeignKey(c => new { c.LinkId })
+                .OnDelete(DeleteBehavior.SetNull);
+
             base.OnModelCreating(builder);
             // Customize the ASP.NET Identity model and override the defaults if needed.
             // For example, you can rename the ASP.NET Identity table names and more.
             // Add your customizations after calling base.OnModelCreating(builder);
         }
+
+        public DbSet<ApplicationUser> ApplicationUser { get; set; }
+        public DbSet<Comment> Comment { get; set; }
+        public DbSet<Link> Link { get; set; }
+
     }
 }
