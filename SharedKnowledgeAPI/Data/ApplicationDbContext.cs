@@ -45,5 +45,6 @@ namespace SharedKnowledgeAPI.Data
         public DbSet<CommentLink> CommentLink { get; set; }
         public DbSet<Link> Link { get; set; }
 
+        public DbSet<Category> Category { get; set; }
     }
 }

@@ -14,6 +14,7 @@ namespace SharedKnowledgeAPI.Models
         public string LinkURL { get; set; }
         public int Rating { get; set; }
         public DateTime Date { get; set; }
+        public string CategoryName { get; set; }
         public string UserId { get; set; }
 
         public virtual ApplicationUser ApplicationUser { get; set; }        

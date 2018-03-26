@@ -138,6 +138,8 @@ namespace SharedKnowledgeAPI.Migrations
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken();
 
+                    b.Property<string>("CustomUserName");
+
                     b.Property<string>("Email")
                         .HasMaxLength(256);
 
@@ -168,6 +170,8 @@ namespace SharedKnowledgeAPI.Migrations
                     b.Property<string>("UserName")
                         .HasMaxLength(256);
 
+                    b.Property<string>("UserRole");
+
                     b.HasKey("Id");
 
                     b.HasIndex("NormalizedEmail")
@@ -179,6 +183,18 @@ namespace SharedKnowledgeAPI.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers");
+                });
+
+            modelBuilder.Entity("SharedKnowledgeAPI.Models.Category", b =>
+                {
+                    b.Property<string>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<string>("Name");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Category");
                 });
 
             modelBuilder.Entity("SharedKnowledgeAPI.Models.CommentLink", b =>
@@ -209,6 +225,8 @@ namespace SharedKnowledgeAPI.Migrations
                 {
                     b.Property<string>("Id")
                         .ValueGeneratedOnAdd();
+
+                    b.Property<string>("CategoryName");
 
                     b.Property<DateTime>("Date");
 

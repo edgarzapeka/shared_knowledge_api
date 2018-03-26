@@ -61,7 +61,9 @@ namespace SharedKnowledgeAPI.Controllers
             var result = await _userManager.CreateAsync(new ApplicationUser {
                 UserName = model.Email,
                 Email = model.Email,
-                Karma = 0
+                Karma = 0,
+                UserRole = "User",
+                CustomUserName = null
             }, model.Password);
 
             if (result.Succeeded)
@@ -98,7 +100,7 @@ namespace SharedKnowledgeAPI.Controllers
             );
             var formattedToken = new JwtSecurityTokenHandler().WriteToken(token);
             //return Ok(new { token = formattedToken, secret = user.SecurityStamp, id = user.Id });
-            return Ok(new UserState() { Id = user.Id, Email = user.Email, Name = user.UserName, Karma = user.Karma, Token = formattedToken, Secret = user.SecurityStamp });
+            return Ok(new UserState() { Id = user.Id, Email = user.Email, Name = user.CustomUserName, Karma = user.Karma, Token = formattedToken, Secret = user.SecurityStamp, UserRole = user.UserRole });
         }
 
         public List<LoginViewModel> GetFakeData()

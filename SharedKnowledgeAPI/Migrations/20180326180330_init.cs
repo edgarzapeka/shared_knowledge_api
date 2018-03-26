@@ -30,6 +30,7 @@ namespace SharedKnowledgeAPI.Migrations
                     Id = table.Column<string>(nullable: false),
                     AccessFailedCount = table.Column<int>(nullable: false),
                     ConcurrencyStamp = table.Column<string>(nullable: true),
+                    CustomUserName = table.Column<string>(nullable: true),
                     Email = table.Column<string>(maxLength: 256, nullable: true),
                     EmailConfirmed = table.Column<bool>(nullable: false),
                     Karma = table.Column<int>(nullable: false),
@@ -42,7 +43,8 @@ namespace SharedKnowledgeAPI.Migrations
                     PhoneNumberConfirmed = table.Column<bool>(nullable: false),
                     SecurityStamp = table.Column<string>(nullable: true),
                     TwoFactorEnabled = table.Column<bool>(nullable: false),
-                    UserName = table.Column<string>(maxLength: 256, nullable: true)
+                    UserName = table.Column<string>(maxLength: 256, nullable: true),
+                    UserRole = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -50,20 +52,15 @@ namespace SharedKnowledgeAPI.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Link",
+                name: "Category",
                 columns: table => new
                 {
                     Id = table.Column<string>(nullable: false),
-                    Date = table.Column<DateTime>(nullable: false),
-                    LinkURL = table.Column<string>(nullable: true),
-                    Rating = table.Column<int>(nullable: false),
-                    Title = table.Column<string>(nullable: true),
-                    UserId = table.Column<string>(nullable: true),
-                    UserName = table.Column<string>(nullable: true)
+                    Name = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Link", x => x.Id);
+                    table.PrimaryKey("PK_Category", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -173,6 +170,29 @@ namespace SharedKnowledgeAPI.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Link",
+                columns: table => new
+                {
+                    Id = table.Column<string>(nullable: false),
+                    CategoryName = table.Column<string>(nullable: true),
+                    Date = table.Column<DateTime>(nullable: false),
+                    LinkURL = table.Column<string>(nullable: true),
+                    Rating = table.Column<int>(nullable: false),
+                    Title = table.Column<string>(nullable: true),
+                    UserId = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Link", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Link_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.SetNull);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "CommentLink",
                 columns: table => new
                 {
@@ -248,6 +268,11 @@ namespace SharedKnowledgeAPI.Migrations
                 name: "IX_CommentLink_LinkId",
                 table: "CommentLink",
                 column: "LinkId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Link_UserId",
+                table: "Link",
+                column: "UserId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -268,16 +293,19 @@ namespace SharedKnowledgeAPI.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
+                name: "Category");
+
+            migrationBuilder.DropTable(
                 name: "CommentLink");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
-                name: "AspNetUsers");
+                name: "Link");
 
             migrationBuilder.DropTable(
-                name: "Link");
+                name: "AspNetUsers");
         }
     }
 }

@@ -10,6 +10,8 @@ namespace SharedKnowledgeAPI.Models
     public class ApplicationUser : IdentityUser
     {
         public int Karma { get; set; }
+        public string UserRole { get; set; }
+        public string CustomUserName { get; set; }
 
         public virtual ICollection<Link> Links { get; set; }
         public virtual ICollection<CommentLink> Comments { get; set; }
