@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace SharedKnowledgeAPI.Migrations
 {
-    public partial class initial : Migration
+    public partial class init : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -47,6 +47,23 @@ namespace SharedKnowledgeAPI.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AspNetUsers", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Link",
+                columns: table => new
+                {
+                    Id = table.Column<string>(nullable: false),
+                    Date = table.Column<DateTime>(nullable: false),
+                    LinkURL = table.Column<string>(nullable: true),
+                    Rating = table.Column<int>(nullable: false),
+                    Title = table.Column<string>(nullable: true),
+                    UserId = table.Column<string>(nullable: true),
+                    UserName = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Link", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -156,33 +173,11 @@ namespace SharedKnowledgeAPI.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Link",
+                name: "CommentLink",
                 columns: table => new
                 {
                     Id = table.Column<string>(nullable: false),
-                    ApplicationUserId = table.Column<string>(nullable: true),
-                    Date = table.Column<DateTime>(nullable: false),
-                    LinkURL = table.Column<string>(nullable: true),
-                    Rating = table.Column<int>(nullable: false),
-                    Title = table.Column<string>(nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Link", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Link_AspNetUsers_ApplicationUserId",
-                        column: x => x.ApplicationUserId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Comment",
-                columns: table => new
-                {
-                    Id = table.Column<string>(nullable: false),
-                    ApplicationUserId = table.Column<string>(nullable: true),
+                    AuthorId = table.Column<string>(nullable: true),
                     Body = table.Column<string>(nullable: true),
                     Date = table.Column<DateTime>(nullable: false),
                     LinkId = table.Column<string>(nullable: true),
@@ -190,15 +185,15 @@ namespace SharedKnowledgeAPI.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Comment", x => x.Id);
+                    table.PrimaryKey("PK_CommentLink", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Comment_AspNetUsers_ApplicationUserId",
-                        column: x => x.ApplicationUserId,
+                        name: "FK_CommentLink_AspNetUsers_AuthorId",
+                        column: x => x.AuthorId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.SetNull);
                     table.ForeignKey(
-                        name: "FK_Comment_Link_LinkId",
+                        name: "FK_CommentLink_Link_LinkId",
                         column: x => x.LinkId,
                         principalTable: "Link",
                         principalColumn: "Id",
@@ -245,19 +240,14 @@ namespace SharedKnowledgeAPI.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Comment_ApplicationUserId",
-                table: "Comment",
-                column: "ApplicationUserId");
+                name: "IX_CommentLink_AuthorId",
+                table: "CommentLink",
+                column: "AuthorId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Comment_LinkId",
-                table: "Comment",
+                name: "IX_CommentLink_LinkId",
+                table: "CommentLink",
                 column: "LinkId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Link_ApplicationUserId",
-                table: "Link",
-                column: "ApplicationUserId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -278,16 +268,16 @@ namespace SharedKnowledgeAPI.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "Comment");
+                name: "CommentLink");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
-                name: "Link");
+                name: "AspNetUsers");
 
             migrationBuilder.DropTable(
-                name: "AspNetUsers");
+                name: "Link");
         }
     }
 }

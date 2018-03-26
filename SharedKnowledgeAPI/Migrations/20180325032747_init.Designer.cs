@@ -11,9 +11,10 @@ using System;
 namespace SharedKnowledgeAPI.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20180325032747_init")]
+    partial class init
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -220,9 +221,9 @@ namespace SharedKnowledgeAPI.Migrations
 
                     b.Property<string>("UserId");
 
-                    b.HasKey("Id");
+                    b.Property<string>("UserName");
 
-                    b.HasIndex("UserId");
+                    b.HasKey("Id");
 
                     b.ToTable("Link");
                 });
@@ -282,14 +283,6 @@ namespace SharedKnowledgeAPI.Migrations
                     b.HasOne("SharedKnowledgeAPI.Models.Link", "Link")
                         .WithMany("Comments")
                         .HasForeignKey("LinkId")
-                        .OnDelete(DeleteBehavior.SetNull);
-                });
-
-            modelBuilder.Entity("SharedKnowledgeAPI.Models.Link", b =>
-                {
-                    b.HasOne("SharedKnowledgeAPI.Models.ApplicationUser", "ApplicationUser")
-                        .WithMany("Links")
-                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.SetNull);
                 });
 #pragma warning restore 612, 618

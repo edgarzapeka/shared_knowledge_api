@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace SharedKnowledgeAPI.Models
 {
-    public class Comment
+    public class CommentLink
     {
         [Key]
         public string Id { get; set; }
@@ -15,6 +15,7 @@ namespace SharedKnowledgeAPI.Models
         public int Rate { get; set; }
 
         public string LinkId { get; set; }
+        public string AuthorId { get; set; }
 
         public virtual ApplicationUser ApplicationUser { get; set; }
         public virtual Link Link { get; set; }

@@ -1,22 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace SharedKnowledgeAPI.Models
+namespace SharedKnowledgeAPI.Data
 {
-    public class Link
+    public class LinkState
     {
-        [Key]
         public string Id { get; set; }
         public string Title { get; set; }
         public string LinkURL { get; set; }
         public int Rating { get; set; }
         public DateTime Date { get; set; }
+        public string UserName { get; set; }
         public string UserId { get; set; }
-
-        public virtual ApplicationUser ApplicationUser { get; set; }        
-        public virtual ICollection<CommentLink> Comments { get; set; }
     }
 }

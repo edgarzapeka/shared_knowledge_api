@@ -21,18 +21,51 @@ namespace SharedKnowledgeAPI.Repositories
             return _context.Link.ToList();
         }
 
-        public bool AddLink(Link link)
+        public Link AddLink(Link link)
         {
             try
             {
                 _context.Link.Add(link);
                 _context.SaveChanges();
-                return true;
+                return link;
             }
             catch
             {
-                return false;
+                return null;
             }
+        }
+
+        public string Delete(Link link)
+        {
+            try
+            {
+                _context.Link.Remove(link);
+                _context.SaveChanges();
+                return link.Id;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        public Link Update(Link link)
+        {
+            try
+            {
+                _context.Link.Update(link);
+                _context.SaveChanges();
+                return link;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        public Link GetLink(string id)
+        {
+            return _context.Link.Where(l => l.Id.Equals(id)).FirstOrDefault();
         }
     }
 }

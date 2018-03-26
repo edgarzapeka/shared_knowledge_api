@@ -11,8 +11,8 @@ using System;
 namespace SharedKnowledgeAPI.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20180323031216_initial")]
-    partial class initial
+    [Migration("20180326001137_dsa")]
+    partial class dsa
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -182,12 +182,12 @@ namespace SharedKnowledgeAPI.Migrations
                     b.ToTable("AspNetUsers");
                 });
 
-            modelBuilder.Entity("SharedKnowledgeAPI.Models.Comment", b =>
+            modelBuilder.Entity("SharedKnowledgeAPI.Models.CommentLink", b =>
                 {
                     b.Property<string>("Id")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<string>("ApplicationUserId");
+                    b.Property<string>("AuthorId");
 
                     b.Property<string>("Body");
 
@@ -199,19 +199,17 @@ namespace SharedKnowledgeAPI.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ApplicationUserId");
+                    b.HasIndex("AuthorId");
 
                     b.HasIndex("LinkId");
 
-                    b.ToTable("Comment");
+                    b.ToTable("CommentLink");
                 });
 
             modelBuilder.Entity("SharedKnowledgeAPI.Models.Link", b =>
                 {
                     b.Property<string>("Id")
                         .ValueGeneratedOnAdd();
-
-                    b.Property<string>("ApplicationUserId");
 
                     b.Property<DateTime>("Date");
 
@@ -221,9 +219,11 @@ namespace SharedKnowledgeAPI.Migrations
 
                     b.Property<string>("Title");
 
+                    b.Property<string>("UserId");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("ApplicationUserId");
+                    b.HasIndex("UserId");
 
                     b.ToTable("Link");
                 });
@@ -273,11 +273,12 @@ namespace SharedKnowledgeAPI.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
-            modelBuilder.Entity("SharedKnowledgeAPI.Models.Comment", b =>
+            modelBuilder.Entity("SharedKnowledgeAPI.Models.CommentLink", b =>
                 {
                     b.HasOne("SharedKnowledgeAPI.Models.ApplicationUser", "ApplicationUser")
-                        .WithMany()
-                        .HasForeignKey("ApplicationUserId");
+                        .WithMany("Comments")
+                        .HasForeignKey("AuthorId")
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("SharedKnowledgeAPI.Models.Link", "Link")
                         .WithMany("Comments")
@@ -288,8 +289,9 @@ namespace SharedKnowledgeAPI.Migrations
             modelBuilder.Entity("SharedKnowledgeAPI.Models.Link", b =>
                 {
                     b.HasOne("SharedKnowledgeAPI.Models.ApplicationUser", "ApplicationUser")
-                        .WithMany()
-                        .HasForeignKey("ApplicationUserId");
+                        .WithMany("Links")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.SetNull);
                 });
 #pragma warning restore 612, 618
         }
