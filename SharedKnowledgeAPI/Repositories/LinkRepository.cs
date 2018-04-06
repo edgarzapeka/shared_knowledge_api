@@ -18,7 +18,8 @@ namespace SharedKnowledgeAPI.Repositories
 
         public IEnumerable<Link> GetAll()
         {
-            return _context.Link.ToList();
+            var links = _context.Link;
+            return links;
         }
 
         public Link AddLink(Link link)

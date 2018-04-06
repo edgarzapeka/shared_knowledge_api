@@ -17,19 +17,15 @@ namespace SharedKnowledgeAPI.Data
         {
             _context = context;
             _userManager = userManager;
-            InitRoles();
-            InitUsers();
-            InitCategories();
-            InitLinks();
         }
 
-        private void InitRoles()
+        public void InitRoles()
         {
             RoleRepository roleRepo = new RoleRepository(_context);
             roleRepo.CreateInitialRoles();
         }
 
-        private void InitCategories()
+        public void InitCategories()
         {
             _context.Category.Add(new Category()
             {
@@ -46,12 +42,12 @@ namespace SharedKnowledgeAPI.Data
             _context.SaveChanges();
         }
 
-        private void InitUsers()
+        public async Task InitUsers()
         {
             ApplicationUser testIfExists = _context.ApplicationUser.Where(au => au.Email.Equals("admin@admin.com")).FirstOrDefault();
             if (testIfExists == null)
             {
-                _userManager.CreateAsync(new ApplicationUser()
+                var resut1 = await _userManager.CreateAsync(new ApplicationUser()
                 {
                     UserName = "admin@admin.com",
                     Email = "admin@admin.com",
@@ -59,7 +55,7 @@ namespace SharedKnowledgeAPI.Data
                     UserRole = "Admin",
                     CustomUserName = "Default Administrator"
                 }, "123$qwE");
-                _userManager.CreateAsync(new ApplicationUser()
+                var result2 = await _userManager.CreateAsync(new ApplicationUser()
                 {
                     UserName = "moderator@moderator.com",
                     Email = "moderator@moderator.com",
@@ -67,7 +63,7 @@ namespace SharedKnowledgeAPI.Data
                     UserRole = "Moderator",
                     CustomUserName = "Default Moderator"
                 }, "123$qwE");
-                _userManager.CreateAsync(new ApplicationUser()
+                var result3 = await _userManager.CreateAsync(new ApplicationUser()
                 {
                     UserName = "user@user.com",
                     Email = "user@user.com",
@@ -75,11 +71,18 @@ namespace SharedKnowledgeAPI.Data
                     UserRole = "User",
                     CustomUserName = "Default User"
                 }, "123$qwE");
+
+                
             }
         }
 
-        private void InitLinks()
+        public void InitLinks()
         {
+            IEnumerable<Link> links = _context.Link.ToList();
+            if (links.Count() != 0)
+            {
+                return;
+            }
             ApplicationUser user = _context.ApplicationUser.Where(au => au.Email.Equals("admin@admin.com")).FirstOrDefault();
             _context.Link.Add(new Link()
             {
@@ -88,7 +91,7 @@ namespace SharedKnowledgeAPI.Data
                 Rating = 15,
                 Date = DateTime.Now,
                 CategoryName = "Startups",
-                UserId = user.Id,
+                //UserId = user.Id,
                 ApplicationUser = user
             });
             _context.Link.Add(new Link()
@@ -98,7 +101,7 @@ namespace SharedKnowledgeAPI.Data
                 Rating = -10,
                 Date = DateTime.Now,
                 CategoryName = "Social Networks",
-                UserId = user.Id,
+                //UserId = user.Id,
                 ApplicationUser = user
             });
             _context.Link.Add(new Link()
@@ -108,7 +111,7 @@ namespace SharedKnowledgeAPI.Data
                 Rating = 23,
                 Date = DateTime.Now,
                 CategoryName = "Social Networks",
-                UserId = user.Id,
+               // UserId = user.Id,
                 ApplicationUser = user
             });
             _context.SaveChanges();

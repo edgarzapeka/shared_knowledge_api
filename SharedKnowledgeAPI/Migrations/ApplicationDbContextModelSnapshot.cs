@@ -202,13 +202,15 @@ namespace SharedKnowledgeAPI.Migrations
                     b.Property<string>("Id")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<string>("AuthorId");
+                    b.Property<string>("AuthorId")
+                        .IsRequired();
 
                     b.Property<string>("Body");
 
                     b.Property<DateTime>("Date");
 
-                    b.Property<string>("LinkId");
+                    b.Property<string>("LinkId")
+                        .IsRequired();
 
                     b.Property<int>("Rate");
 
@@ -295,12 +297,12 @@ namespace SharedKnowledgeAPI.Migrations
                     b.HasOne("SharedKnowledgeAPI.Models.ApplicationUser", "ApplicationUser")
                         .WithMany("Comments")
                         .HasForeignKey("AuthorId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("SharedKnowledgeAPI.Models.Link", "Link")
                         .WithMany("Comments")
                         .HasForeignKey("LinkId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.Restrict);
                 });
 
             modelBuilder.Entity("SharedKnowledgeAPI.Models.Link", b =>
@@ -308,7 +310,7 @@ namespace SharedKnowledgeAPI.Migrations
                     b.HasOne("SharedKnowledgeAPI.Models.ApplicationUser", "ApplicationUser")
                         .WithMany("Links")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.Restrict);
                 });
 #pragma warning restore 612, 618
         }

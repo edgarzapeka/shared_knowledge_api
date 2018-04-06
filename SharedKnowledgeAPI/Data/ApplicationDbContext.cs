@@ -25,20 +25,22 @@ namespace SharedKnowledgeAPI.Data
                 .HasOne(au => au.ApplicationUser)
                 .WithMany(c => c.Comments)
                 .HasForeignKey(fk => fk.AuthorId)
-                .OnDelete(DeleteBehavior.SetNull);
+                .IsRequired(true)
+                .OnDelete(DeleteBehavior.Restrict);
 
             builder.Entity<CommentLink>()
                 .HasOne(l => l.Link)
                 .WithMany(c => c.Comments)
                 .HasForeignKey(fk => fk.LinkId)
-                .OnDelete(DeleteBehavior.SetNull);
+                .IsRequired(true)
+                .OnDelete(DeleteBehavior.Restrict);
 
             builder.Entity<Link>()
                 .HasOne(au => au.ApplicationUser)
                 .WithMany(l => l.Links)
                 .HasForeignKey(fk => fk.UserId)
-                .OnDelete(DeleteBehavior.SetNull);
-           
+                .OnDelete(DeleteBehavior.Restrict);
+            
         }
 
         public DbSet<ApplicationUser> ApplicationUser { get; set; }

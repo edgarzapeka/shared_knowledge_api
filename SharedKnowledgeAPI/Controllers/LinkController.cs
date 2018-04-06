@@ -27,7 +27,17 @@ namespace SharedKnowledgeAPI.Controllers
         {
             return new JsonResult(new
             {
-                links = _linkRepo.GetAll()
+                links = _linkRepo.GetAll().ToList().Select(l => new LinkViewModel
+                {
+                    Id = l.Id,
+                    Title = l.Title,
+                    LinkURL = l.LinkURL,
+                    Rating = l.Rating,
+                    Date = l.Date,
+                    UserName = _context.ApplicationUser.Where(au => au.Id == l.UserId).FirstOrDefault().UserName,
+                    UserId = l.UserId,
+                    Category = l.CategoryName 
+                })
             });
         }
 
@@ -55,14 +65,14 @@ namespace SharedKnowledgeAPI.Controllers
                     Link result = _linkRepo.AddLink(link);
                     if (result != null)
                     {
-                        return new JsonResult(new LinkState()
+                        return new JsonResult(new LinkViewModel()
                         {
                             Id = result.Id,
                             Title = result.Title,
                             LinkURL = result.LinkURL,
                             Date = result.Date,
                             Rating = result.Rating,
-                            UserName = result.ApplicationUser.UserName,
+                            UserName = result.ApplicationUser.CustomUserName != " " ? result.ApplicationUser.CustomUserName : result.ApplicationUser.UserName,
                             UserId = result.ApplicationUser.Id
                         });
                     }
@@ -113,7 +123,7 @@ namespace SharedKnowledgeAPI.Controllers
             string body = json.GetValue("body").ToString();
 
             Link l = _context.Link.Where(link => link.Id.Equals(linkId)).FirstOrDefault();
-            ApplicationUser user = _context.Users.Where(u => u.Id.Equals(authorId)).FirstOrDefault();
+            ApplicationUser user = _context.ApplicationUser.Where(u => u.Id.Equals(authorId)).FirstOrDefault();
 
             try
             {
@@ -127,15 +137,15 @@ namespace SharedKnowledgeAPI.Controllers
                     Link = l,
                     Rate = 0
                 });
-                return new JsonResult(new
+                return new JsonResult(new CommentLinkViewModel
                 {
-                    id = result.Id,
-                    body = result.Body,
-                    date = result.Date,
-                    rating = result.Rate,
-                    authorId = result.AuthorId,
-                    linkId = result.LinkId,
-                    authorName = result.ApplicationUser.UserName
+                    Id = result.Id,
+                    Body = result.Body,
+                    Date = result.Date,
+                    Rating = result.Rate,
+                    AuthorId = result.AuthorId,
+                    LinkId = result.LinkId,
+                    AuthorName = _context.ApplicationUser.Where(au => au.Id == result.AuthorId).FirstOrDefault().UserName
                 });
             }
             catch

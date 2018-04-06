@@ -189,7 +189,7 @@ namespace SharedKnowledgeAPI.Migrations
                         column: x => x.UserId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.SetNull);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -197,10 +197,10 @@ namespace SharedKnowledgeAPI.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(nullable: false),
-                    AuthorId = table.Column<string>(nullable: true),
+                    AuthorId = table.Column<string>(nullable: false),
                     Body = table.Column<string>(nullable: true),
                     Date = table.Column<DateTime>(nullable: false),
-                    LinkId = table.Column<string>(nullable: true),
+                    LinkId = table.Column<string>(nullable: false),
                     Rate = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
@@ -211,13 +211,13 @@ namespace SharedKnowledgeAPI.Migrations
                         column: x => x.AuthorId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.SetNull);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_CommentLink_Link_LinkId",
                         column: x => x.LinkId,
                         principalTable: "Link",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.SetNull);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateIndex(

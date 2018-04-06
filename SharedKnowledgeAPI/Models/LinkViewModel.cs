@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace SharedKnowledgeAPI.Data
+namespace SharedKnowledgeAPI.Models
 {
-    public class LinkState
+    public class LinkViewModel
     {
         public string Id { get; set; }
         public string Title { get; set; }
@@ -14,5 +14,6 @@ namespace SharedKnowledgeAPI.Data
         public DateTime Date { get; set; }
         public string UserName { get; set; }
         public string UserId { get; set; }
+        public string Category { get; set; }
     }
 }
