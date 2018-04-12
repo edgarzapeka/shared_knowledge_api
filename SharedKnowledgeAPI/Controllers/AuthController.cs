@@ -19,6 +19,7 @@ using Newtonsoft.Json.Linq;
 using SharedKnowledgeAPI.Data;
 using SharedKnowledgeAPI.Models;
 using SharedKnowledgeAPI.Models.AccountViewModels;
+using SharedKnowledgeAPI.Services;
 using static SharedKnowledgeAPI.Services.CustomAuthorizationHelper;
 
 namespace SharedKnowledgeAPI.Controllers
@@ -29,13 +30,15 @@ namespace SharedKnowledgeAPI.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IConfiguration _configuration;
         private readonly ApplicationDbContext _context;
+        private readonly IEmailSender _emailSender;
 
-        public AuthController(SignInManager<ApplicationUser> signInManager, UserManager<ApplicationUser> userManager, IConfiguration configuration, ApplicationDbContext context)
+        public AuthController(SignInManager<ApplicationUser> signInManager, UserManager<ApplicationUser> userManager, IConfiguration configuration, ApplicationDbContext context, IEmailSender emailSender)
         {
             _signInManager = signInManager;
             _userManager = userManager;
             _configuration = configuration;
             _context = context;
+            _emailSender = emailSender;
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
@@ -55,8 +58,10 @@ namespace SharedKnowledgeAPI.Controllers
 
                 return await GenerateUserState(model.Email);
             }
-
-            throw new ApplicationException("Invalid Login Attempt");
+            else
+            {
+                return new JsonResult(new { message = "Wrong Credentials" });
+            }
         }
 
         [HttpPost]
@@ -66,19 +71,25 @@ namespace SharedKnowledgeAPI.Controllers
                 UserName = model.Email,
                 Email = model.Email,
                 Karma = 0,
-                UserRole = "User",
-                CustomUserName = null
             }, model.Password);
 
             if (result.Succeeded)
             {
                 ApplicationUser appUser = _context.ApplicationUser.SingleOrDefault(r => r.Email == model.Email);
-                await _signInManager.SignInAsync(appUser, false);
+                appUser.UserRole = "User";
+                appUser.CustomUserName = "User";
+                _context.SaveChanges();
+
+                var code = await _userManager.GenerateEmailConfirmationTokenAsync(appUser);
+                var callbackUrl = Url.EmailConfirmationLink(appUser.Id, code, Request.Scheme);
+                await _emailSender.SendEmailConfirmationAsync(model.Email, callbackUrl);
 
                 return await GenerateUserState(model.Email);
             }
-
-            throw new ApplicationException("Invalid Registration Attempt");
+            else
+            {
+                return new JsonResult(new { message = "Wrong Credentials" });
+            }
         }
 
         private async Task<object> GenerateUserState(string email)
@@ -105,32 +116,6 @@ namespace SharedKnowledgeAPI.Controllers
             var formattedToken = new JwtSecurityTokenHandler().WriteToken(token);
             //return Ok(new { token = formattedToken, secret = user.SecurityStamp, id = user.Id });
             return Ok(new UserState() { Id = user.Id, Email = user.Email, Name = user.CustomUserName, Karma = user.Karma, PhoneNumber = user.PhoneNumber, Token = formattedToken, Secret = user.SecurityStamp, UserRole = user.UserRole });
-        }
-
-        public List<LoginViewModel> GetFakeData()
-        {
-            List<LoginViewModel> logins = new List<LoginViewModel>();
-            logins.Add(new LoginViewModel()
-            {
-                Email = "bob@home.com",
-                Password = "password"
-            });
-            logins.Add(new LoginViewModel()
-            {
-                Email = "fakeuser@home.com",
-                Password = "password"
-            });
-            return logins;
-        }
-
-        // This Action method does not require authentication.
-
-        //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [ClaimRequirement("Custom Validator", "Logged In")]
-        [HttpGet]
-        public IEnumerable<LoginViewModel> Public()
-        {
-            return GetFakeData();
         }
 
         [HttpPost]
@@ -178,7 +163,7 @@ namespace SharedKnowledgeAPI.Controllers
 
                     // Init SmtpClient and send
                     SmtpClient smtpClient = new SmtpClient("smtp.sendgrid.net", Convert.ToInt32(587));
-                    System.Net.NetworkCredential credentials = new System.Net.NetworkCredential("EdgarZapekaBCIT", "Bcit1234!");
+                    System.Net.NetworkCredential credentials = new System.Net.NetworkCredential("thebardaland", "Bcit123!");
                     smtpClient.Credentials = credentials;
 
                     smtpClient.Send(mailMsg);
@@ -191,6 +176,61 @@ namespace SharedKnowledgeAPI.Controllers
                     return new NotFoundResult();
                 }
             }
+            return new NotFoundResult();
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ConfirmEmail(string email)
+        {
+            ApplicationUser user = _context.ApplicationUser.Where(au => au.Email == email).FirstOrDefault();
+            if (user != null)
+            {
+                try
+                {
+                    MailMessage mailMsg = new MailMessage();
+
+                    // To
+                    mailMsg.To.Add(new MailAddress(user.Email, user.CustomUserName));
+
+                    // From
+                    mailMsg.From = new MailAddress("sharedknowledge@thebest.com", "Dear Administration");
+
+                    // Subject and multipart/alternative Body
+                    mailMsg.Subject = "Shared Knowledge | Reset Password";
+                    string text = String.Format("Yo %s this is your link to rest password", user.CustomUserName);
+                    string html = String.Format(@"<a href='http://localhost:3000/confirmemail/{0}/'>Reset password</a>", user.Email);
+                    mailMsg.AlternateViews.Add(AlternateView.CreateAlternateViewFromString(text, null, MediaTypeNames.Text.Plain));
+                    mailMsg.AlternateViews.Add(AlternateView.CreateAlternateViewFromString(html, null, MediaTypeNames.Text.Html));
+
+                    // Init SmtpClient and send
+                    SmtpClient smtpClient = new SmtpClient("smtp.sendgrid.net", Convert.ToInt32(587));
+                    System.Net.NetworkCredential credentials = new System.Net.NetworkCredential("thebardaland", "Bcit123!");
+                    smtpClient.Credentials = credentials;
+
+                    smtpClient.Send(mailMsg);
+
+                    return new OkResult();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                    return new NotFoundResult();
+                }
+            }
+            return new NotFoundResult();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ConfirmEmailAction(string email)
+        {
+            ApplicationUser user = _context.ApplicationUser.Where(au => au.Email == email).FirstOrDefault();
+            if (user != null)
+            {
+                string token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                await _userManager.ConfirmEmailAsync(user, token);
+                return new OkResult();
+            }
+
             return new NotFoundResult();
         }
 
@@ -211,6 +251,29 @@ namespace SharedKnowledgeAPI.Controllers
             }
 
             return new NotFoundResult();
+        }
+
+        [HttpGet]
+        public IActionResult GetAllUsers()
+        {
+            return new JsonResult(_context.ApplicationUser.ToList());
+        }
+
+        [HttpPost]
+        public IActionResult ChangeUserRole([FromBody]JObject json)
+        {
+            string email = json.GetValue("email").ToString();
+            string userRole = json.GetValue("userRole").ToString();
+
+            ApplicationUser user = _context.ApplicationUser.Where(au => au.Email == email).FirstOrDefault();
+            if (user != null)
+            {
+                user.UserRole = userRole;
+                _context.SaveChanges();
+                return new JsonResult(user);
+            }
+
+            return new JsonResult(new{  message = "User not found" });
         }
     }
 }
