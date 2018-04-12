@@ -31,11 +31,14 @@ namespace SharedKnowledgeAPI
         {
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
-                //options.UseSqlite(Configuration.GetConnectionString("DefaultConnection")));
+            //options.UseSqlite(Configuration.GetConnectionString("DefaultConnection")));
 
-            services.AddIdentity<ApplicationUser, IdentityRole>()
-                .AddEntityFrameworkStores<ApplicationDbContext>()
-                .AddDefaultTokenProviders();
+            services.AddIdentity<ApplicationUser, IdentityRole>(config =>
+            {
+                config.SignIn.RequireConfirmedEmail = true;
+            })
+            .AddEntityFrameworkStores<ApplicationDbContext>()
+            .AddDefaultTokenProviders();
 
             // Add application services.
             services.AddTransient<IEmailSender, EmailSender>();
@@ -53,6 +56,7 @@ namespace SharedKnowledgeAPI
                         ClockSkew = TimeSpan.Zero
                     };
                 });
+
             services.AddCors(options => {
                 options.AddPolicy("AllowAll",
                     builder =>

@@ -27,49 +27,57 @@ namespace SharedKnowledgeAPI.Data
 
         public void InitCategories()
         {
-            _context.Category.Add(new Category()
+            if (_context.Category.Count() == 0)
             {
-                Name = "Startups"
-            });
-            _context.Category.Add(new Category()
-            {
-                Name = "Social Networks"
-            });
-            _context.Category.Add(new Category()
-            {
-                Name = "Hadrware"
-            });
-            _context.SaveChanges();
+                _context.Category.Add(new Category()
+                {
+                    Name = "Startups"
+                });
+                _context.Category.Add(new Category()
+                {
+                    Name = "Social Networks"
+                });
+                _context.Category.Add(new Category()
+                {
+                    Name = "Hadrware"
+                });
+                _context.SaveChanges();
+            }
         }
 
         public async Task InitUsers()
         {
-            ApplicationUser testIfExists = _context.ApplicationUser.Where(au => au.Email.Equals("admin@admin.com")).FirstOrDefault();
-            if (testIfExists == null)
+            if (_context.ApplicationUser.Count() == 0)
             {
                 var resut1 = await _userManager.CreateAsync(new ApplicationUser()
                 {
+                    Id = "admin",
                     UserName = "admin@admin.com",
                     Email = "admin@admin.com",
                     Karma = 0,
                     UserRole = "Admin",
-                    CustomUserName = "Default Administrator"
+                    CustomUserName = "Default Administrator",
+                    EmailConfirmed = true
                 }, "123$qwE");
                 var result2 = await _userManager.CreateAsync(new ApplicationUser()
                 {
+                    Id = "moderator",
                     UserName = "moderator@moderator.com",
                     Email = "moderator@moderator.com",
                     Karma = 0,
                     UserRole = "Moderator",
-                    CustomUserName = "Default Moderator"
+                    CustomUserName = "Default Moderator",
+                    EmailConfirmed = true
                 }, "123$qwE");
                 var result3 = await _userManager.CreateAsync(new ApplicationUser()
                 {
+                    Id = "user",
                     UserName = "user@user.com",
                     Email = "user@user.com",
                     Karma = 0,
                     UserRole = "User",
-                    CustomUserName = "Default User"
+                    CustomUserName = "Default User",
+                    EmailConfirmed = true
                 }, "123$qwE");
 
                 
@@ -78,8 +86,7 @@ namespace SharedKnowledgeAPI.Data
 
         public void InitLinks()
         {
-            IEnumerable<Link> links = _context.Link.ToList();
-            if (links.Count() != 0)
+            if (_context.Link.Count() != 0)
             {
                 return;
             }

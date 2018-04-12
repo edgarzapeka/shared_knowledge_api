@@ -14,5 +14,6 @@ namespace SharedKnowledgeAPI.Data
         public string Token { get; set; }
         public string Secret { get; set; }
         public string UserRole { get; set; }
+        public string PhoneNumber { get; set; }
     }
 }

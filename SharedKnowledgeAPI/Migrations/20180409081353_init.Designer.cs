@@ -11,7 +11,7 @@ using System;
 namespace SharedKnowledgeAPI.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20180406081140_init")]
+    [Migration("20180409081353_init")]
     partial class init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

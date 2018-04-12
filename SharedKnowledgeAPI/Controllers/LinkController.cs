@@ -133,8 +133,6 @@ namespace SharedKnowledgeAPI.Controllers
                     Date = DateTime.Now,
                     AuthorId = authorId,
                     LinkId = linkId,
-                    ApplicationUser = user,
-                    Link = l,
                     Rate = 0
                 });
                 return new JsonResult(new CommentLinkViewModel
