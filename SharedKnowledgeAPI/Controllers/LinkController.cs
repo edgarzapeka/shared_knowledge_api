@@ -44,9 +44,10 @@ namespace SharedKnowledgeAPI.Controllers
         [HttpPost]
         public IActionResult Add([FromBody]JObject json)
         {
-            string email = json.GetValue("userEmail").ToString();
+            string email = json.GetValue("email").ToString();
             string title = json.GetValue("title").ToString();
             string url = json.GetValue("url").ToString();
+            string category = json.GetValue("category").ToString();
 
             try
             {
@@ -59,8 +60,8 @@ namespace SharedKnowledgeAPI.Controllers
                         LinkURL = url,
                         Date = DateTime.Now,
                         Rating = 0,
+                        CategoryName = category,
                         UserId = user.Id,
-                        ApplicationUser = user
                     };
                     Link result = _linkRepo.AddLink(link);
                     if (result != null)
@@ -73,7 +74,8 @@ namespace SharedKnowledgeAPI.Controllers
                             Date = result.Date,
                             Rating = result.Rating,
                             UserName = result.ApplicationUser.CustomUserName != " " ? result.ApplicationUser.CustomUserName : result.ApplicationUser.UserName,
-                            UserId = result.ApplicationUser.Id
+                            UserId = result.ApplicationUser.Id,
+                            Category = result.CategoryName
                         });
                     }
                 }
@@ -167,6 +169,55 @@ namespace SharedKnowledgeAPI.Controllers
         public IActionResult GetAllComments()
         {
             return new JsonResult(new { comments = _commentLinkRepo.GetAll() });
+        }
+
+        [HttpGet]
+        public IActionResult IncreaseLinkRate(string id)
+        {
+            Link link = _context.Link.Where(l => l.Id == id).FirstOrDefault();
+            if (link != null)
+            {
+                link.Rating += 1;
+                _context.SaveChanges();
+                return new JsonResult(new LinkViewModel
+                {
+                    Id = link.Id,
+                    Title = link.Title,
+                    LinkURL = link.LinkURL,
+                    Rating = link.Rating,
+                    Date = link.Date,
+                    UserName = _context.ApplicationUser.Where(au => au.Id == link.UserId).FirstOrDefault().UserName,
+                    UserId = link.UserId,
+                    Category = link.CategoryName
+                });
+            }
+
+            return new JsonResult(new { message = "Error. Link Not found" });
+        }
+
+        [HttpGet]
+        public IActionResult DecreaseLinkRate(string id)
+        {
+            Link link = _context.Link.Where(l => l.Id == id).FirstOrDefault();
+            if (link != null)
+            {
+                link.Rating -= 1;
+                _context.SaveChanges();
+
+                return new JsonResult(new LinkViewModel
+                {
+                    Id = link.Id,
+                    Title = link.Title,
+                    LinkURL = link.LinkURL,
+                    Rating = link.Rating,
+                    Date = link.Date,
+                    UserName = _context.ApplicationUser.Where(au => au.Id == link.UserId).FirstOrDefault().UserName,
+                    UserId = link.UserId,
+                    Category = link.CategoryName
+                });
+            }
+
+            return new JsonResult(new { message = "Error. Link Not found" });
         }
     }
 }
