@@ -124,8 +124,8 @@ namespace SharedKnowledgeAPI.Controllers
             string linkId = json.GetValue("linkId").ToString();
             string body = json.GetValue("body").ToString();
 
-            Link l = _context.Link.Where(link => link.Id.Equals(linkId)).FirstOrDefault();
-            ApplicationUser user = _context.ApplicationUser.Where(u => u.Id.Equals(authorId)).FirstOrDefault();
+            Link l = _context.Link.Where(link => link.Id == linkId).FirstOrDefault();
+            ApplicationUser user = _context.ApplicationUser.Where(u => u.Id == authorId).FirstOrDefault();
 
             try
             {

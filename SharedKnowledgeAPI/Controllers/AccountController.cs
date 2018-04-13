@@ -343,7 +343,7 @@ namespace SharedKnowledgeAPI.Controllers
                 throw new ApplicationException($"Unable to load user with ID '{userId}'.");
             }
             var result = await _userManager.ConfirmEmailAsync(user, code);
-            return Redirect("http://localhost:3000/confirmemail");
+            return Redirect("https://calm-shelf-88067.herokuapp.com/confirmemail");
         }
 
         [HttpGet]
